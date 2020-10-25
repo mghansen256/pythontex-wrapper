@@ -11,7 +11,7 @@ pythontexcommand="pythontex3"
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
     echo "pythontex-wrapper V0.1, licensed CC0-1.0"
-    echo "Wrapper around ${latexcommand} for to use ${pythontexcommand} in lyx."
+    echo "Wrapper around ${latexcommand} for use ${pythontexcommand} in lyx."
     echo "See source code for details."
     
     exit 0
