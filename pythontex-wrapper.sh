@@ -8,6 +8,7 @@
 # by changing the executable name
 latexcommand="pdflatex"
 pythontexcommand="pythontex3"
+secondrunfile="pythontex-wrapper-runagain.tmp"
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
     echo "pythontex-wrapper V0.1, licensed CC0-1.0"
@@ -49,6 +50,9 @@ if [ ! -e ${pytxcodefilename} ] ; then
     exit 0
 fi
 
+# remove second-run-request file
+rm -f ${secondrunfile}
+
 echo -e "\n\npythontex-wrapper: Calling ${pythontexcommand}"
 echo -e "------------------------------------------\n\n"
 ${pythontexcommand} $1
@@ -63,6 +67,25 @@ if [ ${lastResult} -gt 0 ]; then
     echo "\\Actually there is a pythontex error, see complete log for details." >>${logfilename}
     
     exit 1
+fi
+
+if [ -e ${secondrunfile} ] ; then
+    # 2nd run of pythontex requested
+    echo -e "\n\npythontex-wrapper: Calling ${pythontexcommand} for 2nd run"
+    echo -e "------------------------------------------\n\n"
+    ${pythontexcommand} --rerun always $1
+    lastResult=$?
+    echo "pythontex run: ${lastResult}" >> pythontex-wrapper.log
+    if [ ${lastResult} -gt 0 ]; then
+        # running pythontex failed
+        # lyx expects LaTeX error messages in the log file
+        # Add a fake latex error message which lyx understands
+        echo "! Undefined control sequence." >>${logfilename}
+        echo "l.17 \\pythontexError" >>${logfilename}
+        echo "\\Actually there is a pythontex error, see complete log for details." >>${logfilename}
+        
+        exit 1
+    fi
 fi
 
 # pythontex worked, run latex again
