@@ -34,7 +34,6 @@ echo -e "\n\npythontex-wrapper: Calling ${latexcommand}"
 echo -e "------------------------------------------\n\n"
 ${latexcommand} $@
 lastResult=$?
-echo "First latex run: ${lastResult}" >> pythontex-wrapper.log
 if [ $lastResult -gt 0 ] ; then
     # compilation using latex failed
     echo "pythontex-wrapper: This was the first latex run, before pythontex was called!" >> ${logfilename}
@@ -55,11 +54,12 @@ rm -f ${secondrunfile}
 
 echo -e "\n\npythontex-wrapper: Calling ${pythontexcommand}"
 echo -e "------------------------------------------\n\n"
-${pythontexcommand} $1
+${pythontexcommand} $1 > ${logfilename}
 lastResult=$?
-echo "pythontex run: ${lastResult}" >> pythontex-wrapper.log
 if [ ${lastResult} -gt 0 ]; then
     # running pythontex failed
+    # show error messages
+    cat ${logfilename}
     # lyx expects LaTeX error messages in the log file
     # Add a fake latex error message which lyx understands
     echo "! Undefined control sequence." >>${logfilename}
@@ -73,11 +73,12 @@ if [ -e ${secondrunfile} ] ; then
     # 2nd run of pythontex requested
     echo -e "\n\npythontex-wrapper: Calling ${pythontexcommand} for 2nd run"
     echo -e "------------------------------------------\n\n"
-    ${pythontexcommand} --rerun always $1
+    ${pythontexcommand} --rerun always $1 > ${logfilename}
     lastResult=$?
-    echo "pythontex run: ${lastResult}" >> pythontex-wrapper.log
     if [ ${lastResult} -gt 0 ]; then
         # running pythontex failed
+        # show error messages
+        cat ${logfilename}
         # lyx expects LaTeX error messages in the log file
         # Add a fake latex error message which lyx understands
         echo "! Undefined control sequence." >>${logfilename}
@@ -93,7 +94,6 @@ echo -e "\n\npythontex-wrapper: Calling ${latexcommand}"
 echo -e "------------------------------------------\n\n"
 ${latexcommand} $@
 lastResult=$?
-echo "Second latex run: ${lastResult}" >> pythontex-wrapper.log
 echo "pythontex-wrapper: This was the second latex run, after pythontex was called!" >> ${logfilename}
 if [ ${lastResult} -gt 0 ] ; then
     # compilation using latex failed
